@@ -52,8 +52,8 @@
   <div id="spacers"></div>
 
   <script>
-    /* 6 stops = 5 scrolls: empty -> furniture -> TV+shelf -> decor -> heading/pills/stats -> CTA */
-    const STOPS = [1, 60, 100, 140, 180, 240];
+    /* 4 stops = 3 scrolls: empty -> furniture+TV -> decor+heading+pills -> stats+CTA */
+    const STOPS = [1, 100, 165, 240];
     const TOTAL = 240, PAD = 4, DIR = "frames_desktop/";
     const src = n => `${DIR}frame_${String(n).padStart(PAD,'0')}.webp`;
 
