@@ -122,7 +122,8 @@
 
   <script>
     /* frame where each element has finished entering (from analysing the video) */
-    const STOPS = [1, 49, 66, 100, 120, 146, 172, 192, 210, 240];
+    /* 6 stops = 5 scrolls: empty -> furniture -> TV+shelf -> decor -> heading/stats -> CTA */
+    const STOPS = [1, 66, 120, 172, 210, 240];
     const TOTAL = 240, PAD = 4, DIR = "frames/";
     const src = n => `${DIR}frame_${String(n).padStart(PAD,'0')}.webp`;
 
