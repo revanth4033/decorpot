@@ -6,96 +6,46 @@
 <title>Decor Pot — Scroll Reveal</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-snap-type:y mandatory;}      /* snap/freeze at each stop */
+  html{scroll-snap-type:y mandatory;}       /* snap/freeze at each stop */
   html,body{height:100%;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    background:radial-gradient(circle at 50% 25%,#2b2f39,#14161c 70%);
-    color:#cdd3dc;
+    background:#0e0f13;color:#cdd3dc;
   }
 
-  /* ---------- FIXED PHONE (stays put while you scroll) ---------- */
+  /* fixed full-screen stage (no phone mockup) */
   .stage{
     position:fixed;inset:0;
     display:flex;align-items:center;justify-content:center;
-    z-index:5;pointer-events:none;
+    background:#0e0f13;z-index:5;overflow:hidden;
   }
-  .phone{
-    position:relative;
-    width:min(392px, calc(100vw - 16px));
-    aspect-ratio:392 / 700;
-    max-height:calc(100svh - 16px);
-    background:#0b0b0d;
-    border-radius:52px;
-    padding:14px;
-    box-shadow:
-      0 0 0 2px #2a2a2e,
-      0 0 0 12px #17171a,
-      0 30px 70px rgba(0,0,0,.55),
-      inset 0 0 3px rgba(255,255,255,.15);
+  #player{
+    width:100%;height:100%;
+    object-fit:cover;         /* fill the screen on phones (portrait) */
+    display:block;
   }
-  .phone::after{
-    content:"";
-    position:absolute;left:-3px;top:150px;width:3px;height:60px;
-    background:#232327;border-radius:4px 0 0 4px;
-    box-shadow:0 -78px 0 #232327,0 100px 0 #232327;
+  /* on landscape/desktop, show the whole 9:16 design centered instead of cropping */
+  @media (min-aspect-ratio:1/1){
+    #player{object-fit:contain;}
   }
-  .screen{
-    position:relative;width:100%;height:100%;
-    border-radius:40px;overflow:hidden;background:#000;
-  }
-  .notch{
-    position:absolute;top:12px;left:50%;transform:translateX(-50%);
-    width:118px;height:30px;background:#0b0b0d;border-radius:18px;z-index:60;
-  }
-  #player{width:100%;height:100%;object-fit:cover;display:block;}
 
   /* scroll hint */
   .hint{
-    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
-    z-index:8;font-size:13px;letter-spacing:.5px;color:#aeb6c2;
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    z-index:8;font-size:13px;letter-spacing:.5px;color:#c3cad6;
     display:flex;flex-direction:column;align-items:center;gap:6px;
-    transition:opacity .4s;
+    transition:opacity .4s;text-shadow:0 1px 4px rgba(0,0,0,.5);
   }
   .hint .chev{width:20px;height:20px;animation:bob 1.4s infinite;}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 
-  /* ---------- SCROLL SNAP SECTIONS (invisible spacers) ---------- */
-  .snap{
-    height:100vh;
-    scroll-snap-align:start;
-    scroll-snap-stop:always;   /* one scroll = one element */
-  }
-
-  /* ---------- MOBILE: drop the mockup, go full-screen ---------- */
-  @media (max-width:640px), (pointer:coarse){
-    .stage{align-items:stretch;}
-    .phone{
-      width:100vw;
-      height:100svh;
-      max-height:none;
-      padding:0;
-      border-radius:0;
-      background:#0e0f13;
-      box-shadow:none;
-    }
-    .phone::after{display:none;}   /* no fake side buttons */
-    .screen{border-radius:0;}
-    .notch{display:none;}          /* real phone already has one */
-    #player{object-fit:cover;background:#0e0f13;}  /* fill screen edge-to-edge */
-    .snap{height:100svh;}
-  }
+  /* invisible scroll spacers */
+  .snap{height:100svh;scroll-snap-align:start;scroll-snap-stop:always;}
 </style>
 </head>
 <body>
-  <!-- Fixed phone overlay -->
   <div class="stage">
-    <div class="phone">
-      <div class="screen">
-        <div class="notch"></div>
-        <img id="player" alt="Decor Pot preview" />
-      </div>
-    </div>
+    <img id="player" alt="Decor Pot preview" />
   </div>
 
   <div class="hint" id="hint">
@@ -103,17 +53,14 @@
     <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
   </div>
 
-  <!-- Scroll spacers: one per stop -->
   <div id="spacers"></div>
 
   <script>
-    /* frame where each element has finished entering (from analysing the video) */
-    /* 6 stops = 5 scrolls: empty -> furniture -> TV+shelf -> decor -> heading/stats -> CTA */
-    const STOPS = [1, 66, 120, 172, 210, 240];
+    /* 4 stops = 3 scrolls: empty -> furniture+TV -> decor+heading+pills -> stats+CTA */
+    const STOPS = [1, 120, 192, 240];
     const TOTAL = 240, PAD = 4, DIR = "frames/";
     const src = n => `${DIR}frame_${String(n).padStart(PAD,'0')}.webp`;
 
-    /* build one snap section per stop */
     const spacers = document.getElementById('spacers');
     STOPS.forEach(() => {
       const s = document.createElement('div'); s.className = 'snap'; spacers.appendChild(s);
@@ -131,13 +78,11 @@
     const sections = [...document.querySelectorAll('.snap')];
     function render(){
       const vh  = sections[0].getBoundingClientRect().height || window.innerHeight;
-      const seg = window.scrollY / vh;                 // which gap we're in (0..N-1)
+      const seg = window.scrollY / vh;
       const i   = Math.min(Math.floor(seg), STOPS.length - 2);
       const f   = Math.min(Math.max(seg - i, 0), 1);
       const frame = Math.round(STOPS[i] + (STOPS[i+1] - STOPS[i]) * f);
-
       if (frame !== shown){ shown = frame; player.src = frames[frame].src; }
-
       hint.style.opacity = window.scrollY > 40 ? 0 : 1;
     }
 
