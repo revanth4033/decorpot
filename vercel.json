@@ -1,8 +1,5 @@
 {
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/mobile", "destination": "/index.html" }
-  ],
   "headers": [
     {
       "source": "/frames/(.*)",
