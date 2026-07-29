@@ -1,0 +1,6 @@
+# heavy source PNG frames + scratch — the optimized frames/ WebP is what ships
+images/
+scratch_*.png
+*.mp4
+node_modules/
+.vercel/

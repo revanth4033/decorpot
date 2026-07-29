@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Decor Pot — Scroll Reveal</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-snap-type:y mandatory;}      /* snap/freeze at each stop */
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:radial-gradient(circle at 50% 25%,#2b2f39,#14161c 70%);
+    color:#cdd3dc;
+  }
+
+  /* ---------- FIXED PHONE (stays put while you scroll) ---------- */
+  .stage{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    z-index:5;pointer-events:none;
+  }
+  .phone{
+    position:relative;
+    width:min(392px, calc(100vw - 16px));
+    aspect-ratio:392 / 700;
+    max-height:calc(100svh - 16px);
+    background:#0b0b0d;
+    border-radius:52px;
+    padding:14px;
+    box-shadow:
+      0 0 0 2px #2a2a2e,
+      0 0 0 12px #17171a,
+      0 30px 70px rgba(0,0,0,.55),
+      inset 0 0 3px rgba(255,255,255,.15);
+  }
+  .phone::after{
+    content:"";
+    position:absolute;left:-3px;top:150px;width:3px;height:60px;
+    background:#232327;border-radius:4px 0 0 4px;
+    box-shadow:0 -78px 0 #232327,0 100px 0 #232327;
+  }
+  .screen{
+    position:relative;width:100%;height:100%;
+    border-radius:40px;overflow:hidden;background:#000;
+  }
+  .notch{
+    position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    width:118px;height:30px;background:#0b0b0d;border-radius:18px;z-index:60;
+  }
+  #player{width:100%;height:100%;object-fit:cover;display:block;}
+
+  /* progress dots on the side */
+  .dots{
+    position:fixed;right:26px;top:50%;transform:translateY(-50%);
+    display:flex;flex-direction:column;gap:12px;z-index:8;
+  }
+  .dots i{
+    width:9px;height:9px;border-radius:50%;
+    background:rgba(255,255,255,.22);transition:.25s;
+  }
+  .dots i.on{background:#e8813a;transform:scale(1.25);}
+
+  /* scroll hint */
+  .hint{
+    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+    z-index:8;font-size:13px;letter-spacing:.5px;color:#aeb6c2;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    transition:opacity .4s;
+  }
+  .hint .chev{width:20px;height:20px;animation:bob 1.4s infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+  /* ---------- SCROLL SNAP SECTIONS (invisible spacers) ---------- */
+  .snap{
+    height:100vh;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;   /* one scroll = one element */
+  }
+</style>
+</head>
+<body>
+  <!-- Fixed phone overlay -->
+  <div class="stage">
+    <div class="phone">
+      <div class="screen">
+        <div class="notch"></div>
+        <img id="player" alt="Decor Pot preview" />
+      </div>
+    </div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="hint" id="hint">
+    <span>Scroll to reveal</span>
+    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+  </div>
+
+  <!-- Scroll spacers: one per stop -->
+  <div id="spacers"></div>
+
+  <script>
+    /* frame where each element has finished entering (from analysing the video) */
+    const STOPS = [1, 49, 66, 100, 120, 146, 172, 192, 210, 240];
+    const TOTAL = 240, PAD = 4, DIR = "frames/";
+    const src = n => `${DIR}frame_${String(n).padStart(PAD,'0')}.webp`;
+
+    /* build one snap section per stop */
+    const spacers = document.getElementById('spacers');
+    const dotsWrap = document.getElementById('dots');
+    STOPS.forEach((_, i) => {
+      const s = document.createElement('div'); s.className = 'snap'; spacers.appendChild(s);
+      const d = document.createElement('i'); if(i===0) d.className='on'; dotsWrap.appendChild(d);
+    });
+    const dots = [...dotsWrap.children];
+
+    /* preload every frame for flicker-free scrubbing */
+    const frames = [];
+    for (let i = 1; i <= TOTAL; i++){ const im = new Image(); im.src = src(i); frames[i] = im; }
+
+    const player = document.getElementById('player');
+    const hint   = document.getElementById('hint');
+    player.src = src(STOPS[0]);
+    let shown = STOPS[0];
+
+    const sections = [...document.querySelectorAll('.snap')];
+    function render(){
+      const vh  = sections[0].getBoundingClientRect().height || window.innerHeight;
+      const seg = window.scrollY / vh;                 // which gap we're in (0..N-1)
+      const i   = Math.min(Math.floor(seg), STOPS.length - 2);
+      const f   = Math.min(Math.max(seg - i, 0), 1);
+      const frame = Math.round(STOPS[i] + (STOPS[i+1] - STOPS[i]) * f);
+
+      if (frame !== shown){ shown = frame; player.src = frames[frame].src; }
+
+      const active = Math.round(seg);
+      dots.forEach((d,k)=>d.classList.toggle('on', k===active));
+      hint.style.opacity = window.scrollY > 40 ? 0 : 1;
+    }
+
+    let ticking = false;
+    addEventListener('scroll', () => {
+      if (!ticking){ requestAnimationFrame(()=>{ render(); ticking=false; }); ticking = true; }
+    }, {passive:true});
+    addEventListener('resize', render);
+    render();
+  </script>
+</body>
+</html>
