@@ -77,6 +77,26 @@
     scroll-snap-align:start;
     scroll-snap-stop:always;   /* one scroll = one element */
   }
+
+  /* ---------- MOBILE: drop the mockup, go full-screen ---------- */
+  @media (max-width:640px), (pointer:coarse){
+    .stage{align-items:stretch;}
+    .phone{
+      width:100vw;
+      height:100svh;
+      max-height:none;
+      padding:0;
+      border-radius:0;
+      background:#0e0f13;
+      box-shadow:none;
+    }
+    .phone::after{display:none;}   /* no fake side buttons */
+    .screen{border-radius:0;}
+    .notch{display:none;}          /* real phone already has one */
+    #player{object-fit:contain;background:#0e0f13;}  /* whole design always visible */
+    .dots{right:12px;gap:10px;}
+    .snap{height:100svh;}
+  }
 </style>
 </head>
 <body>
