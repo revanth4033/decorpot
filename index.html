@@ -50,17 +50,6 @@
   }
   #player{width:100%;height:100%;object-fit:cover;display:block;}
 
-  /* progress dots on the side */
-  .dots{
-    position:fixed;right:26px;top:50%;transform:translateY(-50%);
-    display:flex;flex-direction:column;gap:12px;z-index:8;
-  }
-  .dots i{
-    width:9px;height:9px;border-radius:50%;
-    background:rgba(255,255,255,.22);transition:.25s;
-  }
-  .dots i.on{background:#e8813a;transform:scale(1.25);}
-
   /* scroll hint */
   .hint{
     position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
@@ -94,7 +83,6 @@
     .screen{border-radius:0;}
     .notch{display:none;}          /* real phone already has one */
     #player{object-fit:cover;background:#0e0f13;}  /* fill screen edge-to-edge */
-    .dots{right:12px;gap:10px;}
     .snap{height:100svh;}
   }
 </style>
@@ -109,8 +97,6 @@
       </div>
     </div>
   </div>
-
-  <div class="dots" id="dots"></div>
 
   <div class="hint" id="hint">
     <span>Scroll to reveal</span>
@@ -129,12 +115,9 @@
 
     /* build one snap section per stop */
     const spacers = document.getElementById('spacers');
-    const dotsWrap = document.getElementById('dots');
-    STOPS.forEach((_, i) => {
+    STOPS.forEach(() => {
       const s = document.createElement('div'); s.className = 'snap'; spacers.appendChild(s);
-      const d = document.createElement('i'); if(i===0) d.className='on'; dotsWrap.appendChild(d);
     });
-    const dots = [...dotsWrap.children];
 
     /* preload every frame for flicker-free scrubbing */
     const frames = [];
@@ -155,8 +138,6 @@
 
       if (frame !== shown){ shown = frame; player.src = frames[frame].src; }
 
-      const active = Math.round(seg);
-      dots.forEach((d,k)=>d.classList.toggle('on', k===active));
       hint.style.opacity = window.scrollY > 40 ? 0 : 1;
     }
 
