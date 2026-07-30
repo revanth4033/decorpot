@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Decor Pot — Autoplay (Desktop)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:#0e0f13;color:#cdd3dc;overflow:hidden;
+  }
+  .stage{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:#0e0f13;overflow:hidden;
+  }
+  #player{width:100%;height:100%;object-fit:cover;display:block;}
+
+  /* company logo on the opening frame — fades as playback begins */
+  .logo{
+    position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);
+    z-index:7;width:260px;max-width:34vw;height:auto;
+    pointer-events:none;filter:drop-shadow(0 3px 10px rgba(0,0,0,.18));
+    transition:opacity .3s;
+  }
+  /* replay button (appears at the end) */
+  .replay{
+    position:fixed;left:50%;bottom:30px;transform:translateX(-50%);
+    z-index:8;opacity:0;transition:opacity .4s;pointer-events:none;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(20,22,28,.6);backdrop-filter:blur(6px);
+    color:#fff;border:none;border-radius:30px;padding:12px 22px;
+    font:600 15px/1 inherit;cursor:pointer;
+  }
+  .replay.show{opacity:1;pointer-events:auto;}
+  .replay svg{width:16px;height:16px;}
+</style>
+</head>
+<body>
+  <div class="stage">
+    <img id="player" alt="Decor Pot desktop preview" />
+  </div>
+
+  <img class="logo" id="logo" src="logo-horizontal.png" alt="Decorpot" />
+
+  <button class="replay" id="replay">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.5 9a9 9 0 1 1-.5 5"/></svg>
+    Replay
+  </button>
+
+  <script>
+    const TOTAL = 240, FPS = 24, PAD = 4, DIR = "frames_desktop/";
+    const src = n => `${DIR}frame_${String(n).padStart(PAD,'0')}.webp`;
+
+    const player = document.getElementById('player');
+    const logo   = document.getElementById('logo');
+    const replay = document.getElementById('replay');
+
+    const frames = [];
+    let loaded = 0, started = false;
+    for (let i = 1; i <= TOTAL; i++){
+      const im = new Image();
+      im.onload = () => { if (++loaded === TOTAL) start(); };
+      im.src = src(i);
+      frames[i] = im;
+    }
+    player.src = src(1);
+    setTimeout(() => start(), 2500);
+
+    let timer = null;
+    function start(){ if (started) return; started = true; play(); }
+    function play(){
+      clearInterval(timer);
+      replay.classList.remove('show');
+      let i = 1; player.src = frames[1].src; logo.style.opacity = 1;
+      timer = setInterval(() => {
+        i++;
+        if (i > TOTAL){ clearInterval(timer); replay.classList.add('show'); return; }
+        player.src = frames[i].src;
+        logo.style.opacity = Math.max(0, 1 - (i - 1) / 18);
+      }, 1000 / FPS);
+    }
+    replay.addEventListener('click', play);
+  </script>
+</body>
+</html>
