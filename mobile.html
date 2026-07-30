@@ -29,6 +29,14 @@
     #player{object-fit:contain;}
   }
 
+  /* company logo on the opening (empty) frame — fades out as you scroll */
+  .logo{
+    position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);
+    z-index:7;width:150px;max-width:46vw;height:auto;
+    pointer-events:none;
+    filter:drop-shadow(0 3px 10px rgba(0,0,0,.18));
+  }
+
   /* scroll hint */
   .hint{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
@@ -47,6 +55,8 @@
   <div class="stage">
     <img id="player" alt="Decor Pot preview" />
   </div>
+
+  <img class="logo" id="logo" src="logo-stacked.png" alt="Decorpot" />
 
   <div class="hint" id="hint">
     <span>Scroll to reveal</span>
@@ -72,6 +82,7 @@
 
     const player = document.getElementById('player');
     const hint   = document.getElementById('hint');
+    const logo   = document.getElementById('logo');
     player.src = src(STOPS[0]);
     let shown = STOPS[0];
 
@@ -84,6 +95,7 @@
       const frame = Math.round(STOPS[i] + (STOPS[i+1] - STOPS[i]) * f);
       if (frame !== shown){ shown = frame; player.src = frames[frame].src; }
       hint.style.opacity = window.scrollY > 40 ? 0 : 1;
+      logo.style.opacity = Math.max(0, 1 - window.scrollY / (vh * 0.5));  // fade out on scroll
     }
 
     let ticking = false;
