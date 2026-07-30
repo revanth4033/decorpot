@@ -22,7 +22,7 @@
   /* company logo on the opening frame — fades as playback begins */
   .logo{
     position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);
-    z-index:7;width:150px;max-width:46vw;height:auto;
+    z-index:7;width:216px;max-width:62vw;height:auto;
     pointer-events:none;filter:drop-shadow(0 3px 10px rgba(0,0,0,.18));
     transition:opacity .3s;
   }
@@ -52,7 +52,7 @@
   </button>
 
   <script>
-    const TOTAL = 240, FPS = 24, PAD = 4, DIR = "frames/";
+    const TOTAL = 240, FPS = 40, PAD = 4, DIR = "frames/";   /* 240/40 = ~6s */
     const src = n => `${DIR}frame_${String(n).padStart(PAD,'0')}.webp`;
 
     const player = document.getElementById('player');

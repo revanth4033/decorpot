@@ -21,7 +21,7 @@
   /* company logo on the opening frame — fades as playback begins */
   .logo{
     position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);
-    z-index:7;width:260px;max-width:34vw;height:auto;
+    z-index:7;width:230px;max-width:26vw;height:auto;
     pointer-events:none;filter:drop-shadow(0 3px 10px rgba(0,0,0,.18));
     transition:opacity .3s;
   }
@@ -43,7 +43,7 @@
     <img id="player" alt="Decor Pot desktop preview" />
   </div>
 
-  <img class="logo" id="logo" src="logo-horizontal.png" alt="Decorpot" />
+  <img class="logo" id="logo" src="logo-stacked.png" alt="Decorpot" />
 
   <button class="replay" id="replay">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.5 9a9 9 0 1 1-.5 5"/></svg>
@@ -51,7 +51,7 @@
   </button>
 
   <script>
-    const TOTAL = 240, FPS = 24, PAD = 4, DIR = "frames_desktop/";
+    const TOTAL = 240, FPS = 40, PAD = 4, DIR = "frames_desktop/";   /* 240/40 = ~6s */
     const src = n => `${DIR}frame_${String(n).padStart(PAD,'0')}.webp`;
 
     const player = document.getElementById('player');
